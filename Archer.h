@@ -8,6 +8,6 @@ public:
 	Archer(string name, int hp, int mp, int power, int defence);
 	~Archer();
 
-	void Attack() override;
+	void Attack(Monster* monster) override;
 };
 

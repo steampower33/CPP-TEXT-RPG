@@ -8,6 +8,6 @@ public:
 	Warrior(string name, int hp, int mp, int power, int defence);
 	~Warrior();
 
-	void Attack() override;
+	void Attack(Monster* monster) override;
 };
 

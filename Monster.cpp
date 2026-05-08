@@ -2,8 +2,8 @@
 #include "Monster.h"
 #include "Player.h"
 
-Monster::Monster(string name, int hp, int power, int defence, string dropItemName, int dropItemValue)
-	: Name(name), Hp(hp), Power(power), Defence(defence), DropItemName(dropItemName), DropItemValue(dropItemValue)
+Monster::Monster(string name, int hp, int power, int defence, string dropItemName, int dropItemValue, int expReward)
+	: Name(name), Hp(hp), Power(power), Defence(defence), DropItemName(dropItemName), DropItemValue(dropItemValue), ExpReward(expReward)
 {
 }
 
@@ -13,7 +13,7 @@ Monster::~Monster()
 
 void Monster::Attack(Player* player)
 {
-	cout << "Spraying strong acidic liquid!" << endl;
+	cout << "Monster attacked the player!" << endl;
 	int damage = GetPower() - player->GetDefence();
 	if (damage <= 0)
 		damage = 1;

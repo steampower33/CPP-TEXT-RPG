@@ -10,7 +10,7 @@ class Player;
 class Monster
 {
 public:
-	Monster(string name, int hp, int power, int defence, string dropItemName, int dropItemValue);
+	Monster(string name, int hp, int power, int defence, string dropItemName, int dropItemValue, int expReward);
 	~Monster();
 
 	void Attack(Player* player);
@@ -21,6 +21,7 @@ public:
 	int GetDefence() const { return Defence; }
 	string GetDropItemName() const { return DropItemName; }
 	int GetDropItemValue() const { return DropItemValue; }
+	int GetExpReward() const { return ExpReward; }
 
 	void SetName(const string& name) { Name = name; }
 	void SetHp(int hp) { Hp = hp; }
@@ -35,5 +36,7 @@ private:
 	int Defence;
 	string DropItemName;
 	int DropItemValue;
+
+	int ExpReward;
 };
 

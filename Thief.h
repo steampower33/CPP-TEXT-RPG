@@ -8,6 +8,6 @@ public:
 	Thief(string name, int hp, int mp, int power, int defence);
 	~Thief();
 
-	void Attack() override;
+	void Attack(Monster* monster) override;
 };
 

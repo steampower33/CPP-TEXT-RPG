@@ -6,9 +6,12 @@
 #include "Thief.h"
 #include "Archer.h"
 #include "Monster.h"
-#include <vector>
 #include "AlchemyWorkshop.h"
-#include <random>
+#include "Item.h"
+#include "Inventory.h"
+#include "PotionManager.h"
+
+#include <vector>
 
 void printStatus(string Name, int stat[])
 {
@@ -18,6 +21,16 @@ void printStatus(string Name, int stat[])
 
 	cout << "HP: " << stat[0] << "\t MP: " << stat[1] << endl;
 	cout << "Attack: " << stat[2] << "\t Defense: " << stat[3] << endl;
+}
+
+// 함수를 실행할때는 체력포션과 마나포션 변수의 주소값(&) 전달하고
+// 해당 주소값을 전달 받은 다음 해당 위치에 접근하기 위해서는 *을 통해서 해당 주소가 가리키는 위치에 접근을 한다.
+// 그러고 그 위치에 값을 덮어쓰는 것이다
+// 그리고 만약 포인터를 사용하지 않고 매개변수만 넘겼을 때는 해당 변수의 주소값이 아니고, 그냥 변수 값 자체를 받게되는것이기 되는것이다 
+void setPotion(int count, int* p_HPPotion, int* p_MPPotion)
+{
+	*p_HPPotion = count;
+	*p_MPPotion = count;
 }
 
 int main()
@@ -41,7 +54,7 @@ int main()
 		cout << "Enter HP and MP: ";
 		cin >> stat[0] >> stat[1];
 
-		if (stat[0] < 50 || stat[1] < 50)
+		if (stat[0] < 10 || stat[1] < 10)
 		{
 			cout << "HP or MP is too low. Try again.\n";
 		}
@@ -56,7 +69,7 @@ int main()
 		cout << "Enter Attack and Defense: ";
 		cin >> stat[2] >> stat[3];
 
-		if (stat[2] < 50 || stat[3] < 50)
+		if (stat[2] < 10 || stat[3] < 10)
 		{
 			cout << "Attack or Defense is too low. Try again.\n";
 		}
@@ -68,8 +81,14 @@ int main()
 
 	printStatus(name, stat);
 
-	// STEP3
-	cout << "* You received 5 HP Potions and 5 MP Potions.\n";
+	int HPPotionCnt = 0;
+	int HPPotionAmount = 20;
+	int MPPotionCnt = 0;
+	int MPPotionAmount = 20;
+	int count = 10;
+	setPotion(count, &HPPotionCnt, &MPPotionCnt);
+
+	cout << "* You received " << HPPotionCnt << " HP Potions and " << MPPotionCnt << " MP Potions.\n";
 	cout << "============================================\n";
 	cout << "< Character Upgrade >\n";
 	cout << "1. HP UP    2. MP UP    3. Attack x2\n4. Defense x2  5. Show Stats  0. Start Game\n";
@@ -77,12 +96,6 @@ int main()
 
 	int choice = -1;
 	bool isGameStart = false;
-
-	int hpPotionAmount = 20;
-	int hpPotionCnt = 5;
-	int mpPotionAmount = 20;
-	int mpPotionCnt = 5;
-
 	while (!isGameStart)
 	{
 		cout << "Choose: ";
@@ -97,26 +110,26 @@ int main()
 		}
 		case 1:
 		{
-			if (hpPotionCnt <= 0)
+			if (HPPotionCnt <= 0)
 			{
 				cout << "Out of HP potions.\n";
 				break;
 			}
-			stat[0] += hpPotionAmount;
-			hpPotionCnt--;
-			cout << "* HP increased by " << hpPotionAmount << ". (HP Potion used : " << hpPotionCnt << " left)\n";
+			stat[0] += HPPotionAmount;
+			HPPotionCnt--;
+			cout << "* HP increased by " << HPPotionAmount << ". (HP Potion used : " << HPPotionCnt << " left)\n";
 			break;
 		}
 		case 2:
 		{
-			if (mpPotionCnt <= 0)
+			if (MPPotionCnt <= 0)
 			{
 				cout << "Out of MP potions.\n";
 				break;
 			}
-			stat[1] += mpPotionAmount;
-			mpPotionCnt--;
-			cout << "* MP increased by " << mpPotionAmount << ". (MP Potion used : " << mpPotionCnt << " left)\n";
+			stat[1] += MPPotionAmount;
+			MPPotionCnt--;
+			cout << "* MP increased by " << MPPotionAmount << ". (MP Potion used : " << MPPotionCnt << " left)\n";
 			break;
 		}
 		case 3:
@@ -166,20 +179,40 @@ int main()
 		}
 	}
 
-	// STEP 5, 6, 7
-	vector<Monster> monsters;
-	monsters.push_back({ "Slime", 50, 20, 10, "Slime Jelly", 30 });
-	monsters.push_back({ "Golem", 200, 80, 40, "Giant Stone", 120 });
-	monsters.push_back({ "Skeleton", 400, 160, 80, "Bone", 240 });
+	struct Room {
+		Monster monster;
+		bool isClear;
+	};
 
-	vector<Item> inventory;
+	vector<Room> rooms;
+	rooms.push_back({ Monster{ "Slime", 30, 20, 10, "Slime Jelly", 10, 200 }, false });
+	rooms.push_back({ Monster{ "Goblin", 50, 30, 20, "Goblin Leg", 20, 300 }, false });
+	rooms.push_back({ Monster{ "Orc", 80, 40, 30, "Orc Eye", 30, 400 }, false });
+	rooms.push_back({ { "Dragon", 200, 80, 40, "Dragon Tail", 60, 1000}, false });
+
+	Inventory<Item> inventory;
+	inventory.AddItem({ "HP Potion", 50, 1 });
+	inventory.AddItem({ "MP Potion", 50, 1 });
+
 	AlchemyWorkshop workshop;
 
-	// 난수 생성기 초기화
-	random_device rd;
-	mt19937 gen(rd());
-	// 0 부터 (몬스터 배열 크기 - 1) 까지의 범위를 지정
-	uniform_int_distribution<int> monsterDist(0, monsters.size() - 1);
+	{
+		PotionManager pm;
+
+		pm.AddRecipe("HP Potion");
+
+		pm.DispensePotion("HP Potion");
+		pm.DispensePotion("HP Potion");
+		pm.DispensePotion("HP Potion");
+
+		pm.DispensePotion("HP Potion");
+
+		pm.ReturnPotion("HP Potion");
+
+		pm.ReturnPotion("HP Potion");
+	}
+
+	int roomIndex = 0;
 
 	int mainMenuChoice = -1;
 	while (mainMenuChoice != 0)
@@ -200,35 +233,136 @@ int main()
 		}
 		case 1:
 		{
-			int randomIndex = monsterDist(gen);
+			cout << "[ Dungeon Floor 1]" << endl;
 
-			Monster monster = monsters[randomIndex];
+			for (int i = 0; i < rooms.size() - 1; i++)
+			{
+				auto& monster = rooms[i].monster;
+				cout << "Room " << i + 1 << ": " << monster.GetName() << "\t(HP " << monster.GetHp() << ", Attack " << monster.GetPower() << ", Defence " << monster.GetDefence() << ") -> ";
+
+				if (rooms[i].isClear)
+					cout << "Clear!" << endl;
+				else
+				{
+					cout << "UnClear" << endl;
+				}
+			}
+
+			if (roomIndex == 3)
+			{
+				cout << "★ Boss Room Unlocked!" << endl;
+				cout << "Boss Dragon appears!(HP 200, Attack 60, Defense 20)" << endl;
+			}
+
+			Monster monster = rooms[roomIndex].monster;
 
 			cout << "[ Battle Start! ] " << player->GetName() << "(" << player->GetJob() << ") vs " << monster.GetName() << endl;
 			while (player->GetHp() > 0 && monster.GetHp() > 0)
 			{
 				cout << "--- Player Turn ---\n";
-				player->Attack();
+				cout << "1. Attack" << endl;
+				cout << "2. Use Item" << endl;
+				cout << "Choose: ";
 
-				int damage = player->GetPower() - monster.GetDefence();
-				if (damage <= 0)
-					damage = 1;
+				int battleChoose = -1;
 
-				int beforeMonsterHP = monster.GetHp();
-				int afterMonsterHP = monster.GetHp() - damage;
+				cin >> battleChoose;
 
-				monster.SetHp(afterMonsterHP);
+				switch (battleChoose)
+				{
+				case 1:
+				{
+					player->Attack(&monster);
+					break;
+				}
+				case 2:
+				{
+					inventory.PrintAllItems();
 
-				string monsterName = monster.GetName();
-				cout << damage << " damage to " << monsterName << endl;
-				cout << monsterName << " HP: " << beforeMonsterHP << " -> " << monster.GetHp();
+					cout << "Choose Item: ";
+					int itemChoose = -1;
+					cin >> itemChoose;
+
+					Item* potion = inventory.GetItem(itemChoose - 1);
+
+					if (potion)
+					{
+						cout << "* " << potion->name << "used! ";
+						if (potion->name == string("HP Potion"))
+						{
+							int beforeHP = player->GetHp();
+							player->SetHp(min(beforeHP + 50, player->GetMaxHp()));
+							cout << "HP restored by 50 (" << beforeHP << " -> " << player->GetHp() << ")" << endl;
+							inventory.RemoveItemAt(itemChoose - 1);
+						}
+						else if (potion->name == string("MP Potion"))
+						{
+							int beforeMP = player->GetMp();
+							player->SetMp(min(beforeMP + 50, player->GetMaxMp()));
+							cout << "MP restored by 50 (" << beforeMP << " -> " << player->GetMp() << ")" << endl;
+							inventory.RemoveItemAt(itemChoose - 1);
+						}
+					}
+					else
+					{
+						cout << "Wrong Input" << endl;
+					}
+
+					break;
+				}
+				default:
+					cout << "Wrong Input." << endl;
+					break;
+				}
+
 				if (monster.GetHp() <= 0)
 				{
 					cout << "(Dead)" << endl;
 					cout << "★ Victory!" << endl;
+
+					int monsterExpReward = monster.GetExpReward();
+					player->SetExp(player->GetExp() + monsterExpReward);
+					int exp = player->GetExp();
+					int maxExp = player->GetMaxExp();
+					if (exp >= maxExp)
+					{
+						int beforeLevel = player->GetLevel();
+						int LevelUpAmount = exp / maxExp;
+						int afterLevel = beforeLevel + LevelUpAmount;
+
+						player->SetExp(exp - LevelUpAmount * maxExp);
+						player->SetMaxExp(player->GetMaxExp() + 40 * LevelUpAmount);
+						player->SetLevel(afterLevel);
+						cout << "... Level Up Condition Met" << endl;
+						cout << " -> Level Up! Lv." << beforeLevel << " -> Lv." << afterLevel << endl;
+
+						player->SetHp(player->GetHp() + 10 * LevelUpAmount);
+						player->SetMaxHp(player->GetMaxHp() + 50 * LevelUpAmount);
+						player->SetMp(player->GetMp() + 5 * LevelUpAmount);
+						player->SetMaxMp(player->GetMaxMp() + 100 * LevelUpAmount);
+						player->SetPower(player->GetPower() + 5 * LevelUpAmount);
+						cout << " -> HP + " << 10 * LevelUpAmount << ", MP + " << 5 * LevelUpAmount << ", Power + " << 5 * LevelUpAmount << endl;
+					}
+					else
+					{
+						cout << " -> +" << monsterExpReward << " EXP! (EXP: " << player->GetExp() << "/" << player->GetMaxExp() << ")" << endl;
+					}
+
+					// Save Item To Inventory
 					cout << " -> Got: " << monster.GetDropItemName() << "!\n";
-					inventory.push_back(Item{ monster.GetDropItemName(), monster.GetDropItemValue()});
-					cout << " -> Saved to inventory.\n";
+					inventory.AddItem({ monster.GetDropItemName(), monster.GetDropItemValue(), 1 });
+
+					rooms[roomIndex].isClear = true;
+
+					if (roomIndex == 3 && rooms[roomIndex].isClear)
+					{
+						cout << "Dragon defeated!" << endl;
+						cout << "=== GAME CLEAR! ===" << endl;
+						return 0;
+					}
+
+					roomIndex++;
+
 					break;
 				}
 				else
@@ -247,14 +381,7 @@ int main()
 		}
 		case 2:
 		{
-			cout << "[Inventory(" << inventory.size() << " / 10)]\n";
-			for (int i = 0; i < inventory.size(); i++)
-			{
-				Item item = inventory[i];
-				cout << i + 1 << ". ";
-				item.PrintInfo();
-				cout << endl;
-			}
+			inventory.PrintAllItems();
 			break;
 		}
 		case 3:

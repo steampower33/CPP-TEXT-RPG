@@ -8,6 +8,6 @@ public:
 	Magician(string name, int hp, int mp, int power, int defence);
 	~Magician();
 
-	void Attack() override;
+	void Attack(Monster* monster) override;
 };
 

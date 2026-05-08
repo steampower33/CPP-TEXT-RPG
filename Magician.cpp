@@ -15,7 +15,20 @@ Magician::~Magician()
 {
 }
 
-void Magician::Attack()
+void Magician::Attack(Monster* monster)
 {
-	cout << "Casts a fireball!" << endl;
+	cout << "[Mage] Fires fireball!" << endl;
+
+	int damage = Power - monster->GetDefence();
+	if (damage <= 0)
+		damage = 1;
+
+	int beforeMonsterHP = monster->GetHp();
+	int afterMonsterHP = monster->GetHp() - damage;
+
+	monster->SetHp(afterMonsterHP);
+
+	string monsterName = monster->GetName();
+	cout << " -> " << damage << " damage to " << monsterName << endl;
+	cout << monsterName << " HP: " << beforeMonsterHP << " -> " << monster->GetHp();
 }

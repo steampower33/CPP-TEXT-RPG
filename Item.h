@@ -6,12 +6,10 @@
 using namespace std;
 
 struct Item {
-	Item(string n, int p) : name(n), price(p) {}
+	Item() : name(""), price(0), cnt(0) {}
+	Item(string n, int p, int c) : name(n), price(p), cnt(c) {}
 
 	string name;
 	int price;
-
-	void PrintInfo() const {
-		cout << name << "(" << price << "G)";
-	}
+	int cnt;
 };
